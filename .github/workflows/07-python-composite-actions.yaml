@@ -24,3 +24,10 @@ jobs:
           name: python-test-report
           path: fastapi-app/report/
           if-no-files-found: warn
+      - name: Upload Python wheel
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-wheel
+          path: fastapi-app/dist/*.whl
+          if-no-files-found: warn

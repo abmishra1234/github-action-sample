@@ -1,5 +1,5 @@
 name: Python Project Setup and Execution
-description: Set up Python, install project dependencies, and run unit tests with coverage.
+description: Set up Python, run tests, build a wheel, and verify the installed application.
 
 inputs:
   python-version:
@@ -43,3 +43,18 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: python -m pytest
+
+    - name: Build the wheel package
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: python -m build --wheel
+
+    - name: Check wheel metadata
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: python -m twine check --strict dist/*.whl
+
+    - name: Verify the installed wheel
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      run: python scripts/verify_wheel.py

@@ -89,6 +89,8 @@ github-action-sample/
     |-- pyproject.toml
     |-- requirements.txt
     |-- requirements-dev.txt
+    |-- scripts/
+    |   `-- verify_wheel.py
     |-- app/
     |   |-- __init__.py
     |   |-- main.py
@@ -229,7 +231,7 @@ All seven workflows currently use `workflow_dispatch`; none runs automatically o
 | [04-secrets-env.yaml](.github/workflows/04-secrets-env.yaml) | Secrets And Environment | Demonstrates workflow/job/step variable scopes, shell exports, `$GITHUB_ENV`, `$GITHUB_OUTPUT`, and a job dependency. |
 | [05-matrix.yaml](.github/workflows/05-matrix.yaml) | Matrix Workflow | Creates six combinations of Ubuntu/Windows and Node `18`, `20`, `22`; each sets up Node and prints a message. |
 | [06-composite-actions.yaml](.github/workflows/06-composite-actions.yaml) | Composite Actions | Checks out code and invokes the local React action with Node `24.x`, directory `react-app`, and dependency-install flag `'false'`. |
-| [07-python-composite-actions.yaml](.github/workflows/07-python-composite-actions.yaml) | Python Composite Actions | Checks out code and invokes the local Python action with Python `3.12` and directory `fastapi-app`; installs dependencies and runs tests with an 80% coverage threshold. |
+| [07-python-composite-actions.yaml](.github/workflows/07-python-composite-actions.yaml) | Python Composite Actions | Uses Python `3.13` and directory `fastapi-app`; installs dependencies, tests with an 80% coverage threshold, builds/checks a wheel, verifies the installed application, and uploads reports and the wheel. |
 
 The checkout and Node setup references in the files are `actions/checkout@v7` and `actions/setup-node@v7`. The matrix workflow demonstrates runtime combinations; it does not build or test the React app on those Node versions.
 
@@ -260,6 +262,14 @@ Definition: [.github/actions/python-action-setup/action.yaml](.github/actions/py
 | `doWeWantToInstallDependencies` | No | `'true'` | Controls installation from `requirements-dev.txt`; use `'false'` only if dependencies are already installed. |
 
 The action exposes the installed `python-version`, caches pip downloads using both requirements files, and runs `python -m pytest` using the report and coverage defaults in `pyproject.toml`. Pip caching does not replace dependency installation. Each composite shell step explicitly uses Bash.
+
+It then builds a wheel with `python -m build --wheel`, checks metadata with
+`python -m twine check --strict dist/*.whl`, and runs
+`python scripts/verify_wheel.py`. The script installs the wheel in a fresh virtual
+environment, runs `pip check`, verifies imports from the installed package, and
+tests the application over HTTP outside the source checkout. Results and logs are
+written under `fastapi-app/report/`; the wheel is under `fastapi-app/dist/`.
+See [the FastAPI build instructions](fastapi-app/README.md#build-and-verify-the-wheel).
 
 ### Spring Boot placeholder
 
