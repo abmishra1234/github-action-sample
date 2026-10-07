@@ -1,0 +1,19 @@
+name: Python Composite Actions
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  use-the-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Python action Setup
+        id: python-action-setup
+        uses: ./.github/actions/python-action-setup
+        with:
+          python-version: '3.12'
+          working-directory: fastapi-app
+          doWeWantToInstallDependencies: 'true'
