@@ -5,6 +5,7 @@ requires-python = ">=3.12"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--junitxml=report/test-results.xml --cov=app --cov-report=term-missing --cov-report=html:report/coverage --cov-report=xml:report/coverage.xml --cov-fail-under=80"
 
 [tool.coverage.run]
 source = ["app"]

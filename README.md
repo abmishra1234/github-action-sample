@@ -212,7 +212,7 @@ Run tests inside `fastapi-app/` with the environment active:
 
 ```powershell
 python -m pytest
-python -m pytest --cov=app --cov-report=term-missing --cov-report=html --cov-report=xml --cov-fail-under=80
+python -m pytest
 ```
 
 `requirements-dev.txt` includes runtime dependencies plus testing dependencies. For a runtime-only environment, install `requirements.txt`. Coverage configuration in `pyproject.toml` targets `app`, enables branch measurement, and sets a report threshold of 80%. See [the FastAPI README](fastapi-app/README.md) for its short quick start.
@@ -259,7 +259,7 @@ Definition: [.github/actions/python-action-setup/action.yaml](.github/actions/py
 | `working-directory` | No | `'./'` | Project directory containing the requirements files and tests. |
 | `doWeWantToInstallDependencies` | No | `'true'` | Controls installation from `requirements-dev.txt`; use `'false'` only if dependencies are already installed. |
 
-The action exposes the installed `python-version`, caches pip downloads using both requirements files, and runs `python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80`. Pip caching does not replace dependency installation. Each composite shell step explicitly uses Bash.
+The action exposes the installed `python-version`, caches pip downloads using both requirements files, and runs `python -m pytest` using the report and coverage defaults in `pyproject.toml`. Pip caching does not replace dependency installation. Each composite shell step explicitly uses Bash.
 
 ### Spring Boot placeholder
 
@@ -273,7 +273,7 @@ The following file is empty and does not yet define a usable action:
 | --- | --- | --- |
 | React | `App.test.tsx` checks that the Learn React link renders. | `dist/` from the build; no coverage script is currently configured. |
 | Spring Boot | Application context load, greeting service behavior, and greeting controller responses. | `target/`, test reports under `target/surefire-reports/`, and JaCoCo HTML at `target/site/jacoco/index.html` after `verify`. |
-| FastAPI | Greeting function cases plus greeting and health endpoint responses. | `.coverage`, `htmlcov/index.html`, and `coverage.xml` when running the coverage command above. |
+| FastAPI | Greeting function cases plus greeting and health endpoint responses. | `.coverage`, `report/test-results.xml`, `report/coverage.xml`, and `report/coverage/index.html`. The Python workflow uploads `report/` as the `python-test-report` artifact even when tests fail. |
 
 ## Current implementation notes
 

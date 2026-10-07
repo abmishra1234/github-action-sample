@@ -17,3 +17,10 @@ jobs:
           python-version: '3.12'
           working-directory: fastapi-app
           doWeWantToInstallDependencies: 'true'
+      - name: Upload Python test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-test-report
+          path: fastapi-app/report/
+          if-no-files-found: warn

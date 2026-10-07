@@ -42,4 +42,4 @@ runs:
     - name: Execute the Unit Tests
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-      run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80
+      run: python -m pytest
