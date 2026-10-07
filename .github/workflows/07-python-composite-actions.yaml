@@ -14,6 +14,6 @@ jobs:
         id: python-action-setup
         uses: ./.github/actions/python-action-setup
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           working-directory: fastapi-app
           doWeWantToInstallDependencies: 'true'
