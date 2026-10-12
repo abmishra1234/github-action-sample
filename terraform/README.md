@@ -150,19 +150,24 @@ The state list should include `local_file.hello_world`. A second plan after a su
 
 State and the dependency lock file serve different purposes: state tracks managed objects; the lock file tracks selected provider dependencies. Keep `.terraform.lock.hcl` in version control for a shared exercise. Avoid committing downloaded `.terraform/` directories, state files, saved plans, or generated files. State and plan files may contain resource data. See [dependency lock file guidance](https://developer.hashicorp.com/terraform/language/files/dependency-lock).
 
-The root `.gitignore` currently does not exclude Terraform artifacts. If you decide to commit these exercises, useful Terraform-specific ignore patterns are:
+The root `.gitignore` excludes Terraform runtime artifacts and generated learning
+files. Its Terraform-specific rules are:
 
 ```gitignore
-# Patterns for a .gitignore placed inside terraform/
-**/.terraform/
+.terraform/
 *.tfstate
 *.tfstate.*
 *.tfplan
 .terraform.tfstate.lock.info
-01/hello_world.txt
+/terraform/**/output/
+/terraform/**/*_greeting.txt
+/terraform/**/hello_world.txt
 ```
 
-These are suggested patterns; this documentation task did not change ignore rules.
+Keep `.tf` sources, template files, `dev.tfvars`, `staging.tfvars`, and
+`.terraform.lock.hcl` tracked. Previously tracked runtime files have been removed
+from Git's index while preserving their local copies; this does not erase them
+from existing commits.
 
 ## Environment variable files
 

@@ -1,7 +1,0 @@
-  {
-    app.username = staging-user
-    app.password = staging-example-password
-    app.replicas = 2
-    app.environment = staging-app
-    feature.metrics = true
-  }
