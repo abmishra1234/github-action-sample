@@ -29,6 +29,19 @@ resource "local_file" "nginx_template" {
   })
 }
 
+resource "local_file" "file1" {
+  count    = var.app_replicas
+  filename = "${path.module}/output/file1_${count.index}.txt"
+  content  = "This is file1 content"
+}
+
+// Using for_each
+resource "local_file" "file1_foreach" {
+  for_each = toset(local.service_names)
+  filename = "${path.module}/output/file1_${each.value}.txt"
+  content  = "This is file1 content for replica ${each.value}"
+}
+
 resource "local_file" "hello_world" {
   content         = var.greeting
   filename        = var.filename
