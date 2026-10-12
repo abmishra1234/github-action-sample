@@ -31,3 +31,4 @@ crash.*.log
 /terraform/**/output/
 /terraform/**/*_greeting.txt
 /terraform/**/hello_world.txt
+/terraform/**/hello.txt

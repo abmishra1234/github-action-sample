@@ -1,3 +1,4 @@
+# Child-module inputs receive values from arguments in the parent's module block.
 variable "app_name" {
   type        = string
   description = "Application name used in the generated configuration and filename"

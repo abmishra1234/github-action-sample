@@ -173,7 +173,8 @@ from existing commits.
 
 Keep declarations, types, defaults, and validation in `variables.tf`. The `.tfvars`
 files contain assignments only, while resources in `main.tf` are shared across
-environments. Each example file supplies all eight declared inputs.
+environments. Each environment file supplies the application inputs and module
+inputs; `services` uses its declared default list unless you override it.
 
 | Input | `dev.tfvars` | `staging.tfvars` |
 | --- | --- | --- |
@@ -185,6 +186,9 @@ environments. Each example file supplies all eight declared inputs.
 | `app_replicas` | `1` | `2` |
 | `app_environment` | `dev` | `staging` |
 | `feature.metrics` | `false` | `true` |
+| `greeting_port` | `8080` | `8080` |
+| `billing_ports` | `{ test = 8101, prod = 8102 }` | `{ test = 8101, prod = 8102 }` |
+| `billing_extra_settings.billing_currency` | `USD` | `USD` |
 
 The staging file uses `staging` as its environment value. Both files are loaded
 explicitly, not automatically.
@@ -238,6 +242,73 @@ terraform apply '-var-file=dev.tfvars' '-var=app_replicas=3'
 Repeat the override in later plans to keep the same desired configuration.
 Passwords are demonstration values; the existing resource writes the password
 into the local file and state even though the input is marked sensitive.
+
+## Pass root variables into a child module
+
+Module inputs flow from the parent to the child. The root declares the values it
+wants to accept, and the `module` block connects them to the child's input names.
+Child variables are scoped to the child; the parent reads child results through
+outputs, rather than accessing child variables directly.
+
+For example, the root `variables.tf` declares:
+
+```hcl
+variable "greeting_port" {
+  type        = number
+  description = "Port passed to the greeting module's port input"
+  default     = 8080
+}
+```
+
+The root `main.tf` passes that value to the child's `port` input:
+
+```hcl
+module "greeting" {
+  source      = "./modules/app-config"
+  app_name    = "greeting"
+  environment = var.app_environment
+  port        = var.greeting_port
+  output_dir  = "${path.module}/output"
+}
+```
+
+The child declares `variable "port"` in `modules/app-config/variables.tf` and
+uses `var.port` in `modules/app-config/main.tf`. The root name `greeting_port`
+can differ from the child name `port`: the module argument links them.
+
+The complete path is:
+
+```text
+staging.tfvars or -var=greeting_port=8085
+  -> root var.greeting_port
+  -> module "greeting" argument port
+  -> child var.port
+  -> generated configuration and child outputs
+  -> root greeting_app_config_content / greeting_local_settings
+```
+
+From `terraform/01`, try a different port without editing files:
+
+```powershell
+terraform plan '-var-file=staging.tfvars' '-var=greeting_port=8085' '-out=module-inputs.tfplan'
+terraform show module-inputs.tfplan
+terraform apply module-inputs.tfplan
+terraform output greeting_app_config_content
+terraform output greeting_local_settings
+```
+
+The greeting JSON contains numeric `port: 8085`; the settings output contains
+the string `"8085"` because the child's local uses `tostring(var.port)`.
+
+Billing demonstrates collection inputs. The parent uses
+`for_each = var.billing_ports`, passing `each.key` to `environment` and
+`each.value` to `port`. It also passes `var.billing_extra_settings` to the
+child's `extra_settings`. Both environment files provide the existing ports and
+currency, so this linking preserves those values.
+
+The environment files show how to supply these map values together. Select
+them with `-var-file=dev.tfvars` or `-var-file=staging.tfvars`. Keep repeating
+the selected file and any custom inputs in subsequent plans.
 
 ## Extended variable example
 
@@ -364,7 +435,7 @@ terraform plan
 terraform plan '-var-file=dev.tfvars'
 ```
 
-`dev.tfvars` supplies all eight inputs together. Its filename is deliberately
+`dev.tfvars` supplies the greeting, application, and module inputs together. Its filename is deliberately
 not `terraform.tfvars` or `*.auto.tfvars`, so Terraform loads it only when you
 explicitly supply `-var-file`. It proposes a different greeting and filename;
 review the replacement before applying:

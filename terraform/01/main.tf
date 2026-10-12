@@ -13,7 +13,6 @@ locals {
     highest_port = max([for port in local.service_ports_splat : tonumber(port)]...)
     merged_tags  = merge({ env = local.prefix }, { managed_by = "terraform" })
     has_billing  = contains(keys(var.feature), "billing")
-    timestamp    = formatdate("YYYY-MM-DD'T'hh:mm:ss'Z'", timestamp())
   }
 
 }
@@ -40,6 +39,21 @@ resource "local_file" "file1_foreach" {
   for_each = toset(local.service_names)
   filename = "${path.module}/output/file1_${each.value}.txt"
   content  = "This is file1 content for replica ${each.value}"
+}
+
+resource "local_file" "example" {
+  content         = var.database_username
+  filename        = "${path.module}/hello.txt"
+  file_permission = "0644"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "random_password" "example" {
+  length  = 16
+  special = true
 }
 
 resource "local_file" "hello_world" {
@@ -70,22 +84,32 @@ module "greeting" {
   source      = "./modules/app-config"
   app_name    = "greeting"
   environment = var.app_environment
+  port        = var.greeting_port
   output_dir  = "${path.module}/output"
 }
 
 module "billing" {
   source = "./modules/app-config"
 
-  for_each = { test = 8101, prod = 8102 }
+  for_each = var.billing_ports
 
-  app_name    = "billing"
-  environment = each.key
-  port        = each.value
-  output_dir  = "${path.module}/output"
-  extra_settings = {
-    "billing_currency" = "USD"
+  app_name       = "billing"
+  environment    = each.key
+  port           = each.value
+  output_dir     = "${path.module}/output"
+  extra_settings = var.billing_extra_settings
+}
+
+resource "local_file" "always_present" {
+  filename = "${path.module}/output/always_present.txt"
+  content  = "This file is always present"
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
+
+
 
 
 

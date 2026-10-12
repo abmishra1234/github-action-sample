@@ -31,6 +31,13 @@ variable "file_permission" {
     error_message = "File permission must be a four-digit octal string such as 0644 or 0600."
   }
 }
+# Protected file input
+variable "database_username" {
+  type        = string
+  description = "Database username written to the file protected from destruction"
+  default     = "example-user"
+}
+
 # Application configuration inputs
 variable "app_username" {
   type        = string
@@ -59,6 +66,30 @@ variable "feature" {
     metrics = bool
   })
   description = "Application feature flags; metrics is required"
+}
+
+# Inputs passed from this root module to modules/app-config
+variable "greeting_port" {
+  type        = number
+  description = "Port passed to the greeting module's port input"
+  default     = 8080
+}
+
+variable "billing_ports" {
+  type        = map(number)
+  description = "Billing environments and ports used to create module instances"
+  default = {
+    test = 8101
+    prod = 8102
+  }
+}
+
+variable "billing_extra_settings" {
+  type        = map(string)
+  description = "Settings passed to each billing module's extra_settings input"
+  default = {
+    billing_currency = "USD"
+  }
 }
 
 # Service definitions

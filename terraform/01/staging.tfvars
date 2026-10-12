@@ -15,3 +15,13 @@ app_environment = "staging"
 feature = {
   metrics = true
 }
+
+# Values passed into the reusable app-config module
+greeting_port = 8080
+billing_ports = {
+  test = 8101
+  prod = 8102
+}
+billing_extra_settings = {
+  billing_currency = "USD"
+}
