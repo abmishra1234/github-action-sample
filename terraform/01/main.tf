@@ -65,3 +65,27 @@ resource "local_file" "app_configuration" {
   }
   EOT
 }
+
+module "greeting" {
+  source      = "./modules/app-config"
+  app_name    = "greeting"
+  environment = var.app_environment
+  output_dir  = "${path.module}/output"
+}
+
+module "billing" {
+  source = "./modules/app-config"
+
+  for_each = { test = 8101, prod = 8102 }
+
+  app_name    = "billing"
+  environment = each.key
+  port        = each.value
+  output_dir  = "${path.module}/output"
+  extra_settings = {
+    "billing_currency" = "USD"
+  }
+}
+
+
+
