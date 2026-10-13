@@ -51,7 +51,7 @@ resource "local_file" "example" {
   }
 }
 
-resource "random_password" "example" {
+resource "random_password" "database_password" {
   length  = 16
   special = true
 }
